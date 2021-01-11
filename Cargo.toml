@@ -1,7 +1,7 @@
 [package]
-name = "sysinfo"
+name = "tmux-sysinfo"
 version = "0.1.0"
-authors = ["FliegendeWurst <2012gdwu@web.de>"]
+authors = ["荒野無燈 <@ttys3.net>"]
 license = "GPL-3.0+"
 edition = "2018"
 
@@ -9,5 +9,4 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-
 procfs = "0.9.1"
