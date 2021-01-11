@@ -32,7 +32,7 @@ update_tmux_option() {
 	local option_value="$(get_tmux_option "$option")"
 	# replace interpolation string with a script to execute
 	# local new_option_value="${option_value/$status_interpolation_string/$status_script}"
-	local new_option_value="$status_script} ${option_value}"
+	local new_option_value="$status_script ${option_value}"
 	set_tmux_option "$option" "$new_option_value"
 }
 
