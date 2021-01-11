@@ -14,7 +14,8 @@ fn main() {
 		.count() as f64;
 	*/
 	let real_load = (stat_2 - stat_1) * 1000 / (WAIT_MS as u64);
-	let temp = fs::read_to_string("/sys/class/hwmon/hwmon0/temp1_input").unwrap().trim().parse::<f64>().unwrap() / 1000.0;
+	// /sys/class/hwmon/hwmon0/temp1_input
+	let temp = fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input").unwrap().trim().parse::<f64>().unwrap() / 1000.0;
 	let meminfo = fs::read_to_string("/proc/meminfo").unwrap();
 	let mut meminfo = meminfo.split('\n');
 	let total = meminfo.next().unwrap().split_whitespace().nth(1).unwrap().parse::<u64>().unwrap() / 1_000;
