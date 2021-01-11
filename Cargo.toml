@@ -9,3 +9,5 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
+
+procfs = "0.9.1"

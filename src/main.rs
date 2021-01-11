@@ -1,32 +1,45 @@
 use std::fs;
 
-const WAIT_MS: u32 = 500;
-
 fn main() {
-	let stat_1 = extract_stat();
-	std::thread::sleep_ms(WAIT_MS);
-	let stat_2 = extract_stat();
-	/*
-	let load = fs::read_to_string("/proc/loadavg").unwrap().split(' ').nth(0).unwrap().parse::<f64>().unwrap();
-	let num_cpus = fs::read_dir("/sys/devices/system/cpu").unwrap()
-		.map(|x| x.unwrap().file_name().into_string().unwrap())
-		.filter(|x| x.starts_with("cpu") && x.chars().nth(3).unwrap().is_numeric())
-		.count() as f64;
-	*/
-	let real_load = (stat_2 - stat_1) * 1000 / (WAIT_MS as u64);
-	// /sys/class/hwmon/hwmon0/temp1_input
-	let temp = fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input").unwrap().trim().parse::<f64>().unwrap() / 1000.0;
-	let meminfo = fs::read_to_string("/proc/meminfo").unwrap();
-	let mut meminfo = meminfo.split('\n');
-	let total = meminfo.next().unwrap().split_whitespace().nth(1).unwrap().parse::<u64>().unwrap() / 1_000;
-	let available = meminfo.nth(1).unwrap().split_whitespace().nth(1).unwrap().parse::<u64>().unwrap() / 1_000;
-	//println!("{:.1}% {:.1}°C {}/{}MB", load / num_cpus * 100.0, temp, total - available, total);
-	println!("{}% {:.1}°C {}/{}MB", real_load, temp, total - available, total);
-}
+    let cpu_pressure = procfs::CpuPressure::new().unwrap();
 
-fn extract_stat() -> u64 {
-	let stat = fs::read_to_string("/proc/stat").unwrap();
-	let cpu = stat.lines().find(|x| x.starts_with("cpu ")).unwrap();
-	let times = cpu.split(' ');
-	times.skip(1).filter(|x| !x.is_empty()).take(3).map(|x| x.parse::<u64>().unwrap()).sum::<u64>()
+    /*
+    let load = fs::read_to_string("/proc/loadavg").unwrap().split(' ').nth(0).unwrap().parse::<f64>().unwrap();
+    let num_cpus = fs::read_dir("/sys/devices/system/cpu").unwrap()
+        .map(|x| x.unwrap().file_name().into_string().unwrap())
+        .filter(|x| x.starts_with("cpu") && x.chars().nth(3).unwrap().is_numeric())
+        .count() as f64;
+    */
+    // /sys/class/hwmon/hwmon0/temp1_input
+    let temp = fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input")
+        .unwrap()
+        .trim()
+        .parse::<f64>()
+        .unwrap()
+        / 1000.0;
+
+    let mem_info = procfs::Meminfo::new().unwrap();
+    const MiB: f64 = 1024.0 * 1024.0;
+    const GiB: f64 = MiB * 1024.0;
+    let _mem_usedav = (mem_info.mem_total - mem_info.mem_available.map_or(0, |v| v)) as f64 / GiB;
+    let mut mem_used: u64 = mem_info.mem_total - mem_info.mem_free;
+
+    mem_used += mem_info.shmem.map_or(0, |v| v);
+
+    mem_used -= mem_info.buffers;
+    mem_used -= mem_info.cached;
+    mem_used -= mem_info.s_reclaimable.map_or(0, |v| v);
+    let mem_used = mem_used as f64 / GiB;
+
+    let mem_total = mem_info.mem_total as f64 / GiB;
+    // cpu pressure 10s, 60s, 300s, temp, mem used/total
+    println!(
+        "{} {} {} {:.1}°C {:.2}/{:.2}GB",
+        cpu_pressure.some.avg10,
+        cpu_pressure.some.avg60,
+        cpu_pressure.some.avg300,
+        temp,
+        mem_used,
+        mem_total,
+    );
 }
