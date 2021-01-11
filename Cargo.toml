@@ -1,6 +1,6 @@
 [package]
 name = "tmux-sysinfo"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["荒野無燈 <@ttys3.net>"]
 license = "GPL-3.0+"
 edition = "2018"
