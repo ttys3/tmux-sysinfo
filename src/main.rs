@@ -34,7 +34,7 @@ fn main() {
     let mem_total = mem_info.mem_total as f64 / GiB;
     // cpu pressure 10s, 60s, 300s, temp, mem used/total
     println!(
-        "{} {} {} {:.1}°C {:.2}/{:.2}GB",
+        "{:.2} {:.2} {:.2} {:.1}°C {:.2}/{:.2}GB",
         cpu_pressure.some.avg10,
         cpu_pressure.some.avg60,
         cpu_pressure.some.avg300,
