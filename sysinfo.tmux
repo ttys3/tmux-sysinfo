@@ -22,8 +22,8 @@ set_tmux_option() {
 	tmux set-option -gq "$option" "$value"
 }
 
-ping_host=$(tmux_get '@tmux_ping_host' '192.168.8.1')
-check_url=$(tmux_get '@tmux_check_url' 'https://www.google.com/')
+ping_host=$(get_tmux_option '@tmux_ping_host' '192.168.8.1')
+check_url=$(get_tmux_option '@tmux_check_url' 'https://www.google.com/')
 
 status_script="#($CURRENT_DIR/bin/tmux-curl $check_url) #($CURRENT_DIR/bin/tmux-ping $ping_host) #($CURRENT_DIR/bin/tmux-sysinfo)"
 
