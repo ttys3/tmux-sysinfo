@@ -1,7 +1,10 @@
 # tmux-sysinfo
 
-Measures CPU pressure by reading /proc/pressure/cpu
+Measures CPU pressure by reading `/proc/pressure/cpu`
 
-Temperature read from /sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input.
+temperature read from `/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input`.
 
-RAM usage read from /proc/meminfo (Used, MemTotal). 
+use env `SYSINFO_CPU_TEMP` to specify the temperature file location 
+if `/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input` does not exits
+
+RAM usage read from `/proc/meminfo` (Used, MemTotal). 
