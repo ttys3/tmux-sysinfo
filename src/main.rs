@@ -127,7 +127,7 @@ impl Display for SysInfo {
         }
 
         // cpu pressure 10s, 60s, 300s, temp, mem used/total
-        write!(f,
+        writeln!(f,
             "{:.2} {:.2} {:.2} {:.1}°C {:.2}/{:.2}GB",
             avg10,
             avg60,
