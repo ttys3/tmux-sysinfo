@@ -56,6 +56,8 @@ impl SysInfo {
         // /sys/class/hwmon/hwmon0/temp1_input
         let temp = fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input")
             .or(fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon3/temp1_input"))
+            .or(fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input"))
+            .or(fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon1/temp1_input"))
             .or_else(|_|{
                 let key = CPU_TEMP_ENV_KEY;
                 match env::var(key) {
