@@ -1,5 +1,5 @@
-use std::{fs, io, env};
 use std::fmt::{Display, Formatter};
+use std::{env, fs, io};
 
 const CPU_TEMP_ENV_KEY: &str = "SYSINFO_CPU_TEMP";
 
@@ -18,11 +18,11 @@ struct SysInfo {
 
 impl SysInfo {
     fn new() -> Self {
-        Self{
+        Self {
             temperature: 0.0,
             mem_used: 0.0,
             mem_total: 0.0,
-            cpu_pressure: None
+            cpu_pressure: None,
         }
     }
 
@@ -46,8 +46,8 @@ impl SysInfo {
             Ok(pressure) => {
                 self.cpu_pressure = Some(pressure);
                 Ok(())
-            },
-            Err(err) => Err(err)
+            }
+            Err(err) => Err(err),
         }
     }
 
@@ -55,26 +55,34 @@ impl SysInfo {
         // /sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input
         // /sys/class/hwmon/hwmon0/temp1_input
         let temp = fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input")
-            .or(fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon3/temp1_input"))
-            .or(fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input"))
-            .or(fs::read_to_string("/sys/devices/platform/coretemp.0/hwmon/hwmon1/temp1_input"))
-            .or_else(|_|{
+            .or(fs::read_to_string(
+                "/sys/devices/platform/coretemp.0/hwmon/hwmon3/temp1_input",
+            ))
+            .or(fs::read_to_string(
+                "/sys/devices/platform/coretemp.0/hwmon/hwmon2/temp1_input",
+            ))
+            .or(fs::read_to_string(
+                "/sys/devices/platform/coretemp.0/hwmon/hwmon1/temp1_input",
+            ))
+            .or_else(|_| {
                 let key = CPU_TEMP_ENV_KEY;
                 match env::var(key) {
                     Ok(val) => {
                         println!("{}: {:?}", key, val);
                         fs::read_to_string(val)
-                    },
-                    Err(e) => {
-                        Err(io::Error::new(io::ErrorKind::Other, format!("couldn't interpret {}: {}", key, e)))
-                    },
+                    }
+                    Err(e) => Err(io::Error::new(
+                        io::ErrorKind::Other,
+                        format!("couldn't interpret {}: {}", key, e),
+                    )),
                 }
             })
             .and_then(|data| match data.trim().parse::<f64>() {
-                Ok(x) => {
-                    Ok(x)
-                },
-                Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Could not parse float")),
+                Ok(x) => Ok(x),
+                Err(_) => Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "Could not parse float",
+                )),
             })
             .map(|num| num / 1000.0);
 
@@ -101,7 +109,6 @@ impl SysInfo {
             }
             Err(_) => {}
         }
-
     }
 }
 
@@ -122,21 +129,17 @@ impl Display for SysInfo {
         match &self.cpu_pressure {
             None => {}
             Some(p) => {
-                 avg10 = p.some.avg10;
-                 avg60 = p.some.avg60;
-                 avg300 = p.some.avg300;
+                avg10 = p.some.avg10;
+                avg60 = p.some.avg60;
+                avg300 = p.some.avg300;
             }
         }
 
         // cpu pressure 10s, 60s, 300s, temp, mem used/total
-        writeln!(f,
-            "{:.2} {:.2} {:.2} {:.1}°C {:.2}/{:.2}GB",
-            avg10,
-            avg60,
-            avg300,
-            self.temperature,
-            mem_used_gb,
-            mem_total_gb,
+        writeln!(
+            f,
+            "🖥  {:.2} {:.2} {:.2} 🌡 {:.1}°C ♏ {:.2}/{:.2}GB",
+            avg10, avg60, avg300, self.temperature, mem_used_gb, mem_total_gb,
         )
     }
 }
